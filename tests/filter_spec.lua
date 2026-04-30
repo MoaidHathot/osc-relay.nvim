@@ -1,0 +1,52 @@
+local Filter = require("osc-relay.filter")
+
+describe("filter.parse", function()
+  it("parses single-digit selectors", function()
+    local sel, payload = Filter.parse("\27]0;hello\27\\")
+    assert.equals("0", sel)
+    assert.equals("hello", payload)
+  end)
+
+  it("parses compound selectors like 9;4", function()
+    local sel, payload = Filter.parse("\27]9;4;3;50\27\\")
+    assert.equals("9;4", sel)
+    assert.equals("3;50", payload)
+  end)
+
+  it("accepts BEL terminator", function()
+    local sel = Filter.parse("\27]2;title\7")
+    assert.equals("2", sel)
+  end)
+
+  it("works without ESC] prefix", function()
+    local sel = Filter.parse("9;4;1;75\27\\")
+    assert.equals("9;4", sel)
+  end)
+
+  it("rejects non-OSC input", function()
+    assert.is_nil(Filter.parse(""))
+    assert.is_nil((Filter.parse("garbage")))
+    assert.is_nil((Filter.parse("\27[31m")))
+  end)
+end)
+
+describe("filter.check", function()
+  it("passes when selector in allow", function()
+    local pass, sel = Filter.check("\27]9;4;1;50\27\\", { "9;4" }, {})
+    assert.is_true(pass)
+    assert.equals("9;4", sel)
+  end)
+
+  it("blocks when selector in deny", function()
+    local pass = Filter.check("\27]0;t\27\\", { "*" }, { "0" })
+    assert.is_false(pass)
+  end)
+
+  it("wildcard allows anything", function()
+    assert.is_true((Filter.check("\27]2;t\27\\", { "*" }, {})))
+  end)
+
+  it("default empty allow blocks all", function()
+    assert.is_false((Filter.check("\27]0;t\27\\", {}, {})))
+  end)
+end)

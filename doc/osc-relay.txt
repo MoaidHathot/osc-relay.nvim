@@ -1,0 +1,97 @@
+*osc-relay.txt*  Relay OSC sequences from :terminal children to host terminal
+
+==============================================================================
+INTRODUCTION                                              *osc-relay-intro*
+
+osc-relay.nvim forwards OSC (and DCS/APC) escape sequences emitted by
+processes running inside Neovim's |:terminal| out to the host terminal
+emulator (e.g. Windows Terminal, iTerm2, WezTerm). This lets nested tools
+control the host's tab title, progress bar, etc., even though Neovim
+normally consumes those sequences.
+
+The canonical use case: a long-running CLI (build script, AI agent, etc.)
+emits |OSC 9;4| to drive Windows Terminal's tab progress bar. Without this
+plugin, those bytes never leave Neovim. With it, the bar updates as
+expected.
+
+==============================================================================
+REQUIREMENTS                                       *osc-relay-requirements*
+
+- Neovim >= 0.10 (for the |TermRequest| autocmd)
+- A host terminal that interprets the OSC sequences you forward
+  (Windows Terminal for OSC 9;4 progress; most terminals for OSC 0/2 title)
+
+==============================================================================
+SETUP                                                     *osc-relay-setup*
+
+Auto-loads on startup with default config. To customize: >lua
+
+    require("osc-relay").setup({
+      allow = { "9;4" },
+    })
+<
+==============================================================================
+CONFIG                                                   *osc-relay-config*
+
+Defaults: >lua
+
+    {
+      enabled   = true,
+      allow     = { "9;4" },
+      deny      = {},
+      scope     = "focused",  -- "focused"|"all"|fun(buf)->bool
+      multiplex = "auto",     -- "auto"|"tmux"|"zellij"|"off"
+      reset_on  = { "TermClose", "VimLeavePre" },
+      notify    = true,
+      debug     = false,
+    }
+<
+allow ~
+  OSC selectors to relay. "*" = all. Default `{"9;4"}` forwards only the
+  ConEmu-compatible progress-bar selector. To also forward titles: >lua
+      allow = { "0", "2", "9;4" }
+<
+scope ~
+  "focused" — only relay from the currently focused :terminal buffer.
+  "all"     — relay from every :terminal buffer (last write wins).
+  function  — receives buf id, returns boolean.
+
+multiplex ~
+  When nested under tmux, OSC must be wrapped in DCS passthrough.
+  "auto" detects $TMUX/$ZELLIJ; "off" disables wrapping.
+
+==============================================================================
+API                                                         *osc-relay-api*
+
+require("osc-relay").setup(opts)            *osc-relay.setup()*
+require("osc-relay").enable([buf])          *osc-relay.enable()*
+require("osc-relay").disable([buf])         *osc-relay.disable()*
+require("osc-relay").send(bytes)            *osc-relay.send()*
+require("osc-relay").status()               *osc-relay.status()*
+
+==============================================================================
+EVENTS                                                   *osc-relay-events*
+
+When `notify = true` (default), every forwarded sequence fires a |User|
+autocmd named "OscRelay" with `data = { selector, sequence, buf }`.
+
+Statusline example: >lua
+
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "OscRelay",
+      callback = function(ev)
+        if ev.data.selector == "9;4" then
+          local state = ev.data.sequence:match("9;4;(%d+)")
+          vim.g.osc_relay_state = state
+        end
+      end,
+    })
+<
+==============================================================================
+HEALTH                                                   *osc-relay-health*
+
+`:checkhealth osc-relay` reports nvim version, fd-write availability,
+detected multiplexer, current config, and autocmd registration.
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
