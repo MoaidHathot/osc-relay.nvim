@@ -8,6 +8,46 @@ local Sink = require("osc-relay.sink")
 
 local M = {}
 
+local SUBCMDS = { "status", "enable", "disable", "reset", "send" }
+
+local function register_command()
+  if vim.fn.exists(":OscRelay") == 2 then return end
+  vim.api.nvim_create_user_command("OscRelay", function(opts)
+    local sub = opts.fargs[1] or "status"
+    if sub == "status" then
+      local s = M.status()
+      vim.notify(vim.inspect(s), vim.log.levels.INFO)
+    elseif sub == "enable" then
+      M.enable()
+      vim.notify("osc-relay: enabled", vim.log.levels.INFO)
+    elseif sub == "disable" then
+      M.disable()
+      vim.notify("osc-relay: disabled", vim.log.levels.INFO)
+    elseif sub == "reset" then
+      Sink.write("\27]9;4;0;0\27\\", Config.current.multiplex)
+      vim.notify("osc-relay: progress bar cleared", vim.log.levels.INFO)
+    elseif sub == "send" then
+      local bytes = table.concat(opts.fargs, " ", 2)
+      if bytes == "" then
+        vim.notify("osc-relay: send requires bytes", vim.log.levels.ERROR)
+        return
+      end
+      M.send(bytes)
+    else
+      vim.notify("osc-relay: unknown subcommand: " .. sub, vim.log.levels.ERROR)
+    end
+  end, {
+    nargs = "*",
+    desc = "osc-relay control",
+    complete = function(arglead, line)
+      if line:match("^%s*OscRelay%s+%S*$") then
+        return vim.tbl_filter(function(c) return c:find("^" .. arglead) end, SUBCMDS)
+      end
+      return {}
+    end,
+  })
+end
+
 ---@param opts? OscRelay.Config|table
 function M.setup(opts)
   Config.merge(opts)
@@ -15,6 +55,7 @@ function M.setup(opts)
   if Config.current.enabled then
     Relay.attach()
   end
+  register_command()
 end
 
 ---@param buf? integer  default: global enable

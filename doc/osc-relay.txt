@@ -70,6 +70,22 @@ require("osc-relay").send(bytes)            *osc-relay.send()*
 require("osc-relay").status()               *osc-relay.status()*
 
 ==============================================================================
+COMMANDS                                               *osc-relay-commands*
+
+:OscRelay [status]                                            *:OscRelay*
+                Print current status. Default subcommand.
+
+:OscRelay enable                                       *:OscRelay-enable*
+:OscRelay disable                                     *:OscRelay-disable*
+                Toggle relaying globally.
+
+:OscRelay reset                                         *:OscRelay-reset*
+                Emit OSC 9;4;0;0 to clear the host progress bar.
+
+:OscRelay send {bytes}                                   *:OscRelay-send*
+                Manually relay raw bytes (rarely needed).
+
+==============================================================================
 EVENTS                                                   *osc-relay-events*
 
 When `notify = true` (default), every forwarded sequence fires a |User|

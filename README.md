@@ -25,7 +25,7 @@ Result: any tool running inside `:terminal` can control the host as if it were r
 
 - Neovim **≥ 0.10**
 - A host terminal that understands the OSC sequences you forward. Tested:
-  - **Windows Terminal** — full OSC 9;4 progress bar support
+  - **Windows Terminal** — full OSC 9;4 progress bar support (verified with Neovim 0.11 + sidekick.nvim + opencode)
   - **iTerm2** — OSC 9 (notification), uses different progress conventions
   - **WezTerm** — OSC 9;4 supported
   - **tmux / zellij** — pass-through wrapping handled (see [Multiplexers](#multiplexers))
@@ -151,6 +151,16 @@ require("osc-relay").enable(buf?)       -- enable globally or per-buffer
 require("osc-relay").disable(buf?)
 require("osc-relay").send(bytes)        -- write bytes directly to host pty
 require("osc-relay").status()           -- inspection table
+```
+
+## Commands
+
+```
+:OscRelay [status]      Print current status (default).
+:OscRelay enable        Enable relaying.
+:OscRelay disable       Disable relaying.
+:OscRelay reset         Clear host progress bar (emit OSC 9;4;0;0).
+:OscRelay send <bytes>  Manually relay raw bytes.
 ```
 
 ## `User OscRelay` autocmd

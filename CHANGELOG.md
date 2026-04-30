@@ -16,3 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-reset on `TermClose` / `VimLeavePre`.
 - `User OscRelay` autocmd for in-nvim integrations.
 - `:checkhealth osc-relay`.
+- `:OscRelay` user command (`status`, `enable`, `disable`, `reset`, `send`).
