@@ -36,7 +36,7 @@ Result: any tool running inside `:terminal` can control the host as if it were r
 
 ```lua
 {
-  "moaid-shaik/osc-relay.nvim", -- or your fork
+  "MoaidHathot/osc-relay.nvim",
   event = "VeryLazy",
   opts = {},
 }
@@ -46,7 +46,7 @@ Result: any tool running inside `:terminal` can control the host as if it were r
 
 ```lua
 use({
-  "moaid-shaik/osc-relay.nvim",
+  "MoaidHathot/osc-relay.nvim",
   config = function() require("osc-relay").setup() end,
 })
 ```
