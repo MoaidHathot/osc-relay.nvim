@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Multi-OSC sequences in a single `TermRequest` event are now split and
+  evaluated per-OSC instead of dropped when the first selector fails the
+  allow list. Previously, a child writing `OSC 0` and `OSC 9;4` in one
+  `write()` call would lose the second OSC.
+
 ### Added
 - Initial release.
 - `TermRequest` based OSC relay from `:terminal` children to host terminal.

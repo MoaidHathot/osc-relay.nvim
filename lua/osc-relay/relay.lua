@@ -59,20 +59,28 @@ local function on_term_request(ev)
   if not buf_active(buf) then return end
   if not in_scope(buf) then return end
   local data = ev.data or {}
-  local seq = data.sequence
-  if type(seq) ~= "string" or seq == "" then return end
-  local pass, sel = Filter.check(seq, Config.current.allow, Config.current.deny)
-  if not pass or not sel then return end
-  -- Re-attach terminator: TermRequest strips it from `sequence` on some builds;
-  -- on others it includes it. Normalize: ensure ST suffix.
-  if not seq:find("\27\\$") and not seq:find("\7$") then
-    seq = seq .. "\27\\"
+  local raw = data.sequence
+  if type(raw) ~= "string" or raw == "" then return end
+
+  -- Defensive: a single TermRequest event may carry multiple OSCs
+  -- back-to-back if the child wrote them in one stdout.write. Split and
+  -- evaluate each independently so allow/deny works per-OSC.
+  local parts = Filter.split(raw)
+  if #parts == 0 then parts = { raw } end
+
+  for _, seq in ipairs(parts) do
+    local pass, sel = Filter.check(seq, Config.current.allow, Config.current.deny)
+    if pass and sel then
+      -- Normalize: ensure ESC] prefix and ST terminator.
+      if not seq:find("\27\\$") and not seq:find("\7$") then
+        seq = seq .. "\27\\"
+      end
+      if not seq:find("^\27%]") then
+        seq = "\27]" .. seq
+      end
+      dispatch(seq, buf, sel)
+    end
   end
-  -- Ensure ESC ] prefix
-  if not seq:find("^\27%]") then
-    seq = "\27]" .. seq
-  end
-  dispatch(seq, buf, sel)
 end
 
 local function on_reset(ev)
