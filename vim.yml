@@ -1,0 +1,15 @@
+---
+base: lua51
+
+globals:
+  io.stderr.write:
+    method: true
+    args:
+      - type: string
+
+  io.stderr.flush:
+    method: true
+    args: []
+
+  vim:
+    any: true
