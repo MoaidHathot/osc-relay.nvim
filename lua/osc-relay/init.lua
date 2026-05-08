@@ -11,7 +11,9 @@ local M = {}
 local SUBCMDS = { "status", "enable", "disable", "reset", "send" }
 
 local function register_command()
-  if vim.fn.exists(":OscRelay") == 2 then return end
+  if vim.fn.exists(":OscRelay") == 2 then
+    return
+  end
   vim.api.nvim_create_user_command("OscRelay", function(opts)
     local sub = opts.fargs[1] or "status"
     if sub == "status" then
@@ -41,7 +43,9 @@ local function register_command()
     desc = "osc-relay control",
     complete = function(arglead, line)
       if line:match("^%s*OscRelay%s+%S*$") then
-        return vim.tbl_filter(function(c) return c:find("^" .. arglead) end, SUBCMDS)
+        return vim.tbl_filter(function(c)
+          return c:find("^" .. arglead)
+        end, SUBCMDS)
       end
       return {}
     end,

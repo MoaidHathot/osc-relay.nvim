@@ -9,12 +9,18 @@ local M = {}
 ---@return string? selector  e.g. "0", "9;4"; nil if not an OSC
 ---@return string? payload   text after the selector's first `;`, sans terminator
 function M.parse(seq)
-  if not seq or seq == "" then return nil end
+  if not seq or seq == "" then
+    return nil
+  end
   local s = seq:gsub("^\27%]", "")
   s = s:gsub("\27\\$", ""):gsub("\7$", "")
   local sel, rest = s:match("^(%d+;%d+)(.*)$")
-  if not sel then sel, rest = s:match("^(%d+)(.*)$") end
-  if not sel then return nil end
+  if not sel then
+    sel, rest = s:match("^(%d+)(.*)$")
+  end
+  if not sel then
+    return nil
+  end
   local payload = rest:match("^;(.*)$") or ""
   return sel, payload
 end
@@ -25,13 +31,17 @@ end
 ---@param input string
 ---@return string[]
 function M.split(input)
-  if not input or input == "" then return {} end
+  if not input or input == "" then
+    return {}
+  end
   local out = {}
   local i = 1
   local len = #input
   while i <= len do
     local start = input:find("\27%]", i)
-    if not start then break end
+    if not start then
+      break
+    end
     -- find terminator: ESC \ (two bytes) or BEL (one byte)
     local term_st = input:find("\27\\", start + 2, true)
     local term_bel = input:find("\7", start + 2, true)
@@ -56,7 +66,9 @@ end
 ---@return boolean
 local function matches(sel, list)
   for _, p in ipairs(list) do
-    if p == "*" or p == sel then return true end
+    if p == "*" or p == sel then
+      return true
+    end
   end
   return false
 end
@@ -67,9 +79,15 @@ end
 ---@return boolean pass, string? selector
 function M.check(seq, allow, deny)
   local sel = M.parse(seq)
-  if not sel then return false, nil end
-  if matches(sel, deny) then return false, sel end
-  if not matches(sel, allow) then return false, sel end
+  if not sel then
+    return false, nil
+  end
+  if matches(sel, deny) then
+    return false, sel
+  end
+  if not matches(sel, allow) then
+    return false, sel
+  end
   return true, sel
 end
 

@@ -3,12 +3,22 @@
 local M = {}
 
 local function detect_mux(setting)
-  if setting == "off" then return nil end
-  if setting == "tmux" then return "tmux" end
-  if setting == "zellij" then return "zellij" end
+  if setting == "off" then
+    return nil
+  end
+  if setting == "tmux" then
+    return "tmux"
+  end
+  if setting == "zellij" then
+    return "zellij"
+  end
   -- auto
-  if vim.env.TMUX and vim.env.TMUX ~= "" then return "tmux" end
-  if vim.env.ZELLIJ and vim.env.ZELLIJ ~= "" then return "zellij" end
+  if vim.env.TMUX and vim.env.TMUX ~= "" then
+    return "tmux"
+  end
+  if vim.env.ZELLIJ and vim.env.ZELLIJ ~= "" then
+    return "zellij"
+  end
   return nil
 end
 

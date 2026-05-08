@@ -19,8 +19,12 @@ M.active_buf = nil
 local function in_scope(buf)
   local cfg = Config.current
   local scope = cfg.scope
-  if type(scope) == "function" then return scope(buf) == true end
-  if scope == "all" then return true end
+  if type(scope) == "function" then
+    return scope(buf) == true
+  end
+  if scope == "all" then
+    return true
+  end
   if scope == "focused" then
     return vim.api.nvim_get_current_buf() == buf
   end
@@ -30,7 +34,9 @@ end
 ---@param buf integer
 ---@return boolean
 local function buf_active(buf)
-  if M.buf_enabled[buf] == false then return false end
+  if M.buf_enabled[buf] == false then
+    return false
+  end
   return Config.current.enabled
 end
 
@@ -56,17 +62,25 @@ end
 
 local function on_term_request(ev)
   local buf = ev.buf
-  if not buf_active(buf) then return end
-  if not in_scope(buf) then return end
+  if not buf_active(buf) then
+    return
+  end
+  if not in_scope(buf) then
+    return
+  end
   local data = ev.data or {}
   local raw = data.sequence
-  if type(raw) ~= "string" or raw == "" then return end
+  if type(raw) ~= "string" or raw == "" then
+    return
+  end
 
   -- Defensive: a single TermRequest event may carry multiple OSCs
   -- back-to-back if the child wrote them in one stdout.write. Split and
   -- evaluate each independently so allow/deny works per-OSC.
   local parts = Filter.split(raw)
-  if #parts == 0 then parts = { raw } end
+  if #parts == 0 then
+    parts = { raw }
+  end
 
   for _, seq in ipairs(parts) do
     local pass, sel = Filter.check(seq, Config.current.allow, Config.current.deny)
@@ -88,7 +102,9 @@ local function on_reset(ev)
   if ev.event == "VimLeavePre" or M.active_buf == ev.buf or M.active_buf == nil then
     Sink.write(OSC_RESET, Config.current.multiplex)
     M.last[ev.buf] = nil
-    if M.active_buf == ev.buf then M.active_buf = nil end
+    if M.active_buf == ev.buf then
+      M.active_buf = nil
+    end
   end
 end
 

@@ -1,9 +1,17 @@
 local M = {}
 
-local function start(report) return report.start or vim.health.start end
-local function ok(report) return report.ok or vim.health.ok end
-local function warn(report) return report.warn or vim.health.warn end
-local function err(report) return report.error or vim.health.error end
+local function start(report)
+  return report.start or vim.health.start
+end
+local function ok(report)
+  return report.ok or vim.health.ok
+end
+local function warn(report)
+  return report.warn or vim.health.warn
+end
+local function err(report)
+  return report.error or vim.health.error
+end
 
 function M.check()
   local h = vim.health
@@ -29,7 +37,10 @@ function M.check()
 
   local has = false
   for _, a in ipairs(vim.api.nvim_get_autocmds({ event = "TermRequest" })) do
-    if a.group_name == "OscRelay" then has = true; break end
+    if a.group_name == "OscRelay" then
+      has = true
+      break
+    end
   end
   if has then
     ok(h)("TermRequest autocmd registered")
