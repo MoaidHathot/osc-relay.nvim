@@ -194,3 +194,4 @@ Reports nvim version, `vim.uv.fs_write` availability, detected multiplexer, curr
 ## License
 
 [Unlicense](LICENSE) — public domain.
+
